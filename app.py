@@ -47,7 +47,7 @@ def safe_image(img_path, caption=None, use_container_width=True):
     
     # 2. 如果不存在，自动尝试其他常见后缀（大写 JPG、PNG 等）
     base, ext = os.path.splitext(img_path)
-    for alt_ext in [ext.upper(), ext.lower(), '.jpg', '.JPG', '.png', '.PNG', '.jpeg', '.JPEG']:
+    for altfor alt_ext in [ext.upper(), ext.lower(), '.jpg', '.JPG', '.png', '.PNG', '.jpeg', '.JPEG', '.jpg.jpg', '.jpg.JPG', '.JPG.jpg', '.JPG.JPG']:_ext in [ext.upper(), ext.lower(), '.jpg', '.JPG', '.png', '.PNG', '.jpeg', '.JPEG']:
         alt_path = base + alt_ext
         if os.path.exists(alt_path):
             st.image(alt_path, caption=caption, use_container_width=use_container_width)
