@@ -1,7 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import sqlite3
-import os  # 新增：用于检测文件是否存在
+import os
 
 # ==================== 1. 初始化数据库设置 ====================
 def init_db():
@@ -37,17 +37,21 @@ def get_comments(dish_id):
 init_db()
 
 
-# ==================== 2. 安全图片加载器（防崩溃核心） ====================
-# 这个函数会自动尝试各种大小写后缀，如果文件不存在，会显示温馨提示而绝对不红屏崩溃！
+# ==================== 2. 安全图片加载器（支持双后缀 .jpg.jpg） ====================
 def safe_image(img_path, caption=None, use_container_width=True):
     # 1. 尝试原文件名
     if os.path.exists(img_path):
         st.image(img_path, caption=caption, use_container_width=use_container_width)
         return
     
-    # 2. 如果不存在，自动尝试其他常见后缀（大写 JPG、PNG 等）
+    # 2. 如果不存在，自动尝试其他常见后缀（这里加入了 .jpg.jpg 双后缀的自动识别）
     base, ext = os.path.splitext(img_path)
-    for altfor alt_ext in [ext.upper(), ext.lower(), '.jpg', '.JPG', '.png', '.PNG', '.jpeg', '.JPEG', '.jpg.jpg', '.jpg.JPG', '.JPG.jpg', '.JPG.JPG']:_ext in [ext.upper(), ext.lower(), '.jpg', '.JPG', '.png', '.PNG', '.jpeg', '.JPEG']:
+    alt_suffixes = [
+        ext.upper(), ext.lower(), 
+        '.jpg', '.JPG', '.png', '.PNG', '.jpeg', '.JPEG', 
+        '.jpg.jpg', '.jpg.JPG', '.JPG.jpg', '.JPG.JPG'
+    ]
+    for alt_ext in alt_suffixes:
         alt_path = base + alt_ext
         if os.path.exists(alt_path):
             st.image(alt_path, caption=caption, use_container_width=use_container_width)
@@ -166,7 +170,6 @@ if menu == "🍔 经典美食评测":
         st.divider()
         col_img, col_txt = st.columns([1, 1.2])
         with col_img: 
-            # 使用安全加载器
             safe_image(data["image"])
         with col_txt:
             st.title(data["title"])
@@ -265,7 +268,7 @@ elif menu == "📓 个人私密日记":
             后来西班牙赢了，我猜对了。
 
             下一次见面，隔了整整一个月。她连着上了一个月的班，没有私人时间。
-            I didn't rush her.
+            我没有催她。
             送出那套三支装手霜礼盒的时候，我也把那条三克的金项链给了她。
             我觉得我们接触了快两个月，也是时候了。
             路医生没有生气，她把项链收下，又温和地推回来：
@@ -454,7 +457,6 @@ elif menu == "🛒 Wallace 的日常生活":
 
 
 # ==================== 5. 🎵 底部 B 站背景音乐播放器（回归主宽屏，解决精简版音量被隐藏的问题） ====================
-# 这里把它从左侧窄边栏移回主宽页面最下方，B站播放器会自动识别并显示完整版，包含音量调节滑块！
 st.write("---")
 st.markdown("#### 🎵 顺河高架电台")
 st.write("点击下方播放按钮，一边听着温暖的 Lo-Fi 音乐，一边开启阅读之旅吧：")
