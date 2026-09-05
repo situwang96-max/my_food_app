@@ -127,7 +127,7 @@ if "selected_dish" not in st.session_state: st.session_state.selected_dish = Non
 if "selected_diary" not in st.session_state: st.session_state.selected_diary = None
 if "selected_daily" not in st.session_state: st.session_state.selected_daily = None
 
-# 🔒 新增：初始化日记锁定状态
+# 初始化日记锁定状态
 if "diary_unlocked" not in st.session_state: 
     st.session_state.diary_unlocked = False
 
@@ -242,15 +242,12 @@ if menu == "🍔 经典美食评测":
                 if st.button(f"点赞 👍 ({st.session_state.likes_dish1})", key="btn_dish1"): st.session_state.likes_dish1 += 1; st.rerun()
 
 
-# ==================== 页面二：个人私密日记（新增密码保护） ====================
+# ==================== 页面二：个人私密日记 ====================
 elif menu == "📓 个人私密日记":
-    # 🔐 如果未解锁，显示输入密码界面
     if not st.session_state.diary_unlocked:
         st.title("🔒 访问受限")
         st.markdown("这里是 Wallace 的私人空间，需要输入密码才能查阅。")
         
-        # 密码输入框，type="password" 会自动将输入的内容变成圆点 ●●●●●
-        # 默认密码是 wallace1996，你可以随时把下面这一行中的 wallace1996 改成其他的
         pwd_input = st.text_input("请输入访问密码：", type="password", placeholder="请输入密码...")
         if st.button("解锁空间 🔑"):
             if pwd_input == "wallace1996":
@@ -260,63 +257,60 @@ elif menu == "📓 个人私密日记":
             else:
                 st.error("❌ 密码错误，请重新输入！")
     
-    # 🔓 如果已解锁，正常展示日记内容
     else:
         DIARY_POSTS = {
             "road": {
                 "title": "《路》—— 顺河高架与三克的温度",
                 "date": "2026-09-05",
                 "excerpt": "凌晨三点的济南，顺河高架上很空。没有一辆车在等。但我知道，什么都会发生。",
-                "content": """
-                一套欧舒丹三支装手霜礼盒的重量，九十克。
-                一条我自己买的金项链的重量，三克。
-                三克，并不多。
-                路医生把后者退给我的时候，是在我的车里。
-                她说：
-                “现在还不是时候。”
-                她抵押给我的，是下一次见面。
+                "content": """一套欧舒丹三支装手霜礼盒的重量，九十克。
+一条我自己买的金项链的重量，三克。
+三克，并不多。
+路医生把后者退给我的时候，是在我的车里。
+她说：
+“现在还不是时候。”
+她抵押给我的，是下一次见面。
 
-                济南第三人民医院在工业北路，旁边是顺河高架。
-                她在那里的消化科，值班，查房，看那些坏掉的胃。
-                她天天很忙，待遇降了不少，她觉得绝望，甚至开玩笑说想去跑外卖。
-                我没有劝她坚持。
-                我是唯一一个劝她辞职的人。
+济南第三人民医院在工业北路，旁边是顺河高架。
+她在那里的消化科，值班，查房，看那些坏掉的胃。
+她天天很忙，待遇降了不少，她觉得绝望，甚至开玩笑说想去跑外卖。
+我没有劝她坚持。
+我是唯一一个劝她辞职的人。
 
-                七月，二十六国外的世界杯决赛还没踢。
-                她猜阿根廷夺冠，我猜西班牙。
-                后来西班牙赢了，我猜对了。
+七月，二十六国外的世界杯决赛还没踢。
+她猜阿根廷夺冠，我猜西班牙。
+后来西班牙赢了，我猜对了。
 
-                下一次见面，隔了整整一个月。她连着上了一个月的班，没有私人时间。
-                我没有催她。
-                送出那套三支装手霜礼盒的时候，我也把那条三克的金项链给了她。
-                我觉得我们接触了快两个月，也是时候了。
-                路医生没有生气，她把项链收下，又温和地推回来：
-                “下次见面，我给你送回来。”
-                她没有说下次是什么时候。
-                我也没有问。
+下一次见面，隔了整整一个月。她连着上了一个月的班，没有私人时间。
+我没有催她。
+送出那套三支装手霜礼盒的时候，我也把那条三克的金项链给了她。
+我觉得我们接触了快两个月，也是时候了。
+路医生没有生气，她把项链收下，又温和地推回来：
+“下次见面，我给你送回来。”
+她没有说下次是什么时候。
+我也没有问。
 
-                那天她刚烫了头发。
-                新发型有些蓬松，显得比平时成熟，甚至有些老气。她没化妆，皮肤在下午车里的光线里，不如上次见面时雪白。
-                我看着她的侧脸。
-                我的心跳很稳。
-                一分钟六十几下，和在银行上班、看复核姐姐哭泣时没有区别。
+那天她刚烫了头发。
+新发型有些蓬松，显得比平时成熟，甚至有些老气。她没化妆，皮肤在下午车里的光线里，不如上次见面时雪白。
+我看着她的侧脸。
+我的心跳很稳。
+一分钟六十几下，和在银行上班、看复核姐姐哭泣时没有区别。
 
-                我每周去五次健身房，自己做健康餐。
-                她不知道我曾经有过多么混乱的深夜，我从没让她发现过，以后她也不会知道了。
+我每周去五次健身房，自己做健康餐。
+她不知道我曾经有过多么混乱的深夜，我从没让她发现过，以后她也不会知道了。
 
-                今晚，我买了山姆的大鱿鱼、罗氏虾和肥肠。
-                我今天去外面的健身房练了力量，感觉力气变大了，手臂上的肌肉绷得很紧。
-                路医生的那套手霜礼盒，还在她的抽屉里。
-                下周，她要来还那条项链。
-                那是我们的第五次见面。
+今晚，我买了山姆的大鱿鱼、罗氏虾和肥肠。
+我今天去外面的健身房练了力量，感觉力气变大了，手臂上的肌肉绷得很紧。
+路医生的那套手霜礼盒，还在她的抽屉里。
+下周，她要来还那条项链。
+那是我们的第五次见面。
 
-                我想：
-                原来是这样。
-                凌晨三点的济南，顺河高架上很空。
-                没有一辆车在等。
-                但这一次。
-                我知道，什么都会发生。
-                """
+我想：
+原来是这样。
+凌晨三点的济南，顺河高架上很空。
+没有一辆车在等。
+但这一次。
+我知道，什么都会发生。"""
             }
         }
 
@@ -332,9 +326,7 @@ elif menu == "📓 个人私密日记":
             st.caption(f"🕒 发表于 {post['date']} | 独立创作")
             
             st.markdown(f"""
-            <div style="font-family: 'Georgia', serif; font-size: 1.15em; line-height: 2; color: #2c3e50; padding: 20px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-width: 800px; margin: 0 auto;">
-                {post['content'].replace('\\n', '<br>')}
-            </div>
+            <div style="font-family: 'Georgia', serif; font-size: 1.15em; line-height: 2; color: #2c3e50; padding: 25px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-width: 800px; margin: 0 auto; white-space: pre-wrap;">{post['content']}</div>
             """, unsafe_allow_html=True)
             
             st.write("---")
@@ -376,42 +368,38 @@ elif menu == "🛒 Wallace 的日常生活":
             "date": "2026-09-05",
             "excerpt": "176块1毛6的加拿大牛腱子，裹在坚硬的塑料膜里，呈现出一种近乎死寂的暗红色。在这里，生命被切割、冷冻、明码标价。",
             "images": ["daily_sams_cart.jpg", "daily_sams_shank.jpg", "daily_frozen_beef.jpg", "daily_lunch.jpg"],
-            "content": """
-            白炽日光灯像冰冷的刀子，无情地剖开山姆会员店巨大的、挑高的、充斥着冷气的空间。
-            我推着笨重的购物车，不锈钢车轮在干净得有些虚无的地面上发出轻微、神经质的摩擦声。
-            
-            176块1毛6的加拿大牛腱子，裹在紧绷、反光的塑料收缩膜里，呈现出一种近乎死寂的暗红色。
-            旁边是布满人工白霜的雪花肥牛，那脂肪的花纹在低温中冷酷而精确。
-            在这里，往昔狂奔的生命被切割、冷冻、明码标价。
-            
-            我冷漠地往铁网车里扔了一箱无糖希腊酸奶和一颗巨大的、布满斑纹的西瓜。它们沉重地坠落，像墓碑和炮弹一样压弯了不锈钢铁网。
-            
-            回到银行，正午。
-            食堂白瓷盘里那个木讷的南瓜、缠绕多汁的粉丝，以及泛着温热油光的肉丸，在复核姐姐细微、沉闷的啜泣声中，被我一口口机械地咽下喉咙。
-            我的心跳依旧是一分钟六十几下，稳定、迟闷得像一架没有灵魂的工业测谎仪。
-            混乱的深夜早已远去，我只是用哑铃、冰冷的重铁和这大块的生牛肉，将它们生生压进废墟的底层，筑起一道理性的高墙。
-            """
+            "content": """白炽日光灯像冰冷的刀子，无情地剖开山姆会员店巨大的、挑高的、充斥着冷气的空间。
+我推着笨重的购物车，不锈钢车轮在干净得有些虚无的地面上发出轻微、神经质的摩擦声。
+
+176块1毛6的加拿大牛腱子，裹在紧绷、反光的塑料收缩膜里，呈现出一种近乎死寂的暗红色。
+旁边是布满人工白霜的雪花肥牛，那脂肪的花纹在低温中冷酷而精确。
+在这里，往昔狂奔的生命被切割、冷冻、明码标价。
+
+我冷漠地往铁网车里扔了一箱无糖希腊酸奶和一颗巨大的、布满斑纹的西瓜。它们沉重地坠落，像墓碑和炮弹一样压弯了不锈钢铁网。
+
+回到银行，正午。
+食堂白瓷盘里那个木讷的南瓜、缠绕多汁的粉丝，以及泛着温热油光的肉丸，在复核姐姐细微、沉闷的泣声中，被我一口口机械地咽下喉咙。
+我的心跳依旧是一分钟六十几下，稳定、迟闷得像一架没有灵魂的工业测谎仪。
+混乱的深夜早已远去，我只是用哑铃、冰冷的重铁和这大块的生牛肉，将它们生生压进废墟的底层，筑起一道理性的高墙。"""
         },
         "kitchen": {
             "title": "《黄油、烈火与虎皮青椒的余温》",
             "date": "2026-09-05",
             "excerpt": "粗砺的青椒在铸铁锅的干烧下绽开焦黑的斑点，像垂死挣扎时留下的虎皮斑纹。这就是食物的解剖。",
             "images": ["daily_butter_prawns.jpg", "daily_prep_board.jpg", "daily_tofu_beef_pot.jpg", "daily_beef_wok.jpg", "daily_boiled_beef.jpg", "daily_stewed_beef.jpg"],
-            "content": """
-            案板上，苍白、坚硬的北豆腐被利刃切成绝对完美的几何方块。
-            旁边，粗砺的青椒在铸铁锅烈火的干烧下急剧收缩，绽开焦黑、碳化的斑点，像野兽垂死挣扎时留下的虎皮斑纹。
-            
-            在我眼里，烹饪不是艺术，而是一场对自然生命精密的解剖。
-            
-            金黄色的黄油在高温的煎锅中发出滋滋的、绝望的哀鸣，随即化为一摊滚烫的油脂，将那些罗氏大虾那艳丽、坚硬的红壳无情地吞噬。
-            铁锅里大火翻炒，热油的甜香混杂着大蒜被拍碎后释放的辛辣，在一瞬间将狭窄的厨房填满。
-            这些曾经在水底游动的生灵，在我的铁锅里完成了它们最后一次壮烈、香气四溢的合唱。
-            
-            当红亮的虾肉、冒着滚烫气泡的牛肉豆腐煲以及泼满芝麻的水煮牛肉端上木桌时，我独自坐在阴影里，看着浓白的热气在空气中徐徐上升，又在数秒内迅速、寂静地消散。
-            
-            食物不过是维持肉体运动的卡路里。
-            而在每一个无人的深夜，我正是用这些精妙、算计好的热量，维持着我与这个荒诞世界最虚妄的连接。
-            """
+            "content": """案板上，苍白、坚硬的北豆腐被利刃切成绝对完美的几何方块。
+旁边，粗砺的青椒在铸铁锅烈火的干烧下急剧收缩，绽开焦黑、碳化的斑点，像野兽垂死挣扎时留下的虎皮斑纹。
+
+在我眼里，烹饪不是艺术，而是一场对自然生命精密的解剖。
+
+金黄色的黄油在高温的煎锅中发出滋滋的、绝望的哀鸣，随即化为一摊滚烫的油脂，将那些罗氏大虾那艳丽、坚硬的红壳无情地吞噬。
+铁锅里大火翻炒，热油的甜香混杂着大蒜被拍碎后释放的辛辣，在一瞬间将狭窄的厨房填满。
+这些曾经在水底游动的生灵，在我的铁锅里完成了它们最后一次壮烈、香气四溢的合唱。
+
+当红亮的虾肉、冒着滚烫气泡的牛肉豆腐煲以及泼满芝麻的水煮牛肉端上木桌时，我独自坐在阴影里，看着浓白的热气在空气中徐徐上升，又在数秒内迅速、寂静地消散。
+
+食物不过是维持肉体运动的卡路里。
+而在每一个无人的深夜，我正是用这些精妙、算计好的热量，维持着我与这个荒诞世界最虚妄的连接。"""
         }
     }
 
@@ -427,9 +415,7 @@ elif menu == "🛒 Wallace 的日常生活":
         st.caption(f"🕒 记录时间：{story['date']} | 摄影与撰文：Wallace")
         
         st.markdown(f"""
-        <div style="font-family: 'Kaiti', 'STKaiti', serif; font-size: 1.2em; line-height: 2.1; color: #1a1a1a; padding: 25px; background-color: #FDFCF7; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); max-width: 850px; margin: 0 auto; border-left: 4px solid #8e8e8e;">
-            {story['content'].replace('\\n', '<br>')}
-        </div>
+        <div style="font-family: 'Kaiti', 'STKaiti', serif; font-size: 1.2em; line-height: 2.1; color: #1a1a1a; padding: 25px; background-color: #FDFCF7; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); max-width: 850px; margin: 0 auto; border-left: 4px solid #8e8e8e; white-space: pre-wrap;">{story['content']}</div>
         """, unsafe_allow_html=True)
         
         st.write("---")
@@ -474,8 +460,7 @@ elif menu == "🛒 Wallace 的日常生活":
                 st.rerun()
 
 
-# ==================== 5. 侧边栏辅助功能：一键锁定与电台 ====================
-# 🔒 如果已经解锁，在左侧侧边栏提供一个“一键重新锁定”的按钮，保护隐私
+# ==================== 5. 侧边栏辅助功能：仅保留锁定按钮（提升手机端与音量体验） ====================
 if st.session_state.diary_unlocked:
     st.sidebar.write("---")
     st.sidebar.subheader("🔒 隐私保护")
@@ -483,18 +468,22 @@ if st.session_state.diary_unlocked:
         st.session_state.diary_unlocked = False
         st.rerun()
 
-st.sidebar.write("---")
-st.sidebar.markdown("#### 🎵 顺河高架电台")
-st.sidebar.write("点击下方播放按钮，一边听着温暖的 Lo-Fi 音乐，一边开启阅读之旅吧：")
-with st.sidebar:
-    components.html("""
-    <iframe src="//player.bilibili.com/player.html?bvid=BV1Aa411C7EJ&page=1&high_quality=1" 
-            scrolling="no" 
-            border="0" 
-            frameborder="no" 
-            framespacing="0" 
-            allowfullscreen="true" 
-            width="100%" 
-            height="320">
-    </iframe>
-    """, height=340)
+
+# ==================== 6. 全局背景音乐播放器（主页面最下方，解决手机端隐藏与电脑端音量调节问题） ====================
+# 把它放回右侧主页面最下方：
+# 1. 完美保留 B 站电脑端右下角的“音量调节”滑块。
+# 2. 手机端一拉到底就能直接看到，完全不用点击左上角的“展开侧边栏”箭头。
+st.write("---")
+st.markdown("#### 🎵 顺河高架电台")
+st.write("点击下方播放按钮，一边听着温暖的 Lo-Fi 音乐，一边开启美食与阅读之旅吧：")
+components.html("""
+<iframe src="//player.bilibili.com/player.html?bvid=BV1Aa411C7EJ&page=1&high_quality=1" 
+        scrolling="no" 
+        border="0" 
+        frameborder="no" 
+        framespacing="0" 
+        allowfullscreen="true" 
+        width="100%" 
+        height="320">
+</iframe>
+""", height=340)
