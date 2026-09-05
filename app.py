@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import sqlite3
+import os  # 新增：用于检测文件是否存在
 
 # ==================== 1. 初始化数据库设置 ====================
 def init_db():
@@ -36,10 +37,29 @@ def get_comments(dish_id):
 init_db()
 
 
-# ==================== 2. 网页初始化与特效/背景美化 ====================
+# ==================== 2. 安全图片加载器（防崩溃核心） ====================
+# 这个函数会自动尝试各种大小写后缀，如果文件不存在，会显示温馨提示而绝对不红屏崩溃！
+def safe_image(img_path, caption=None, use_container_width=True):
+    # 1. 尝试原文件名
+    if os.path.exists(img_path):
+        st.image(img_path, caption=caption, use_container_width=use_container_width)
+        return
+    
+    # 2. 如果不存在，自动尝试其他常见后缀（大写 JPG、PNG 等）
+    base, ext = os.path.splitext(img_path)
+    for alt_ext in [ext.upper(), ext.lower(), '.jpg', '.JPG', '.png', '.PNG', '.jpeg', '.JPEG']:
+        alt_path = base + alt_ext
+        if os.path.exists(alt_path):
+            st.image(alt_path, caption=caption, use_container_width=use_container_width)
+            return
+            
+    # 3. 实在没有找到，显示友好提示，不破坏网页结构
+    st.info(f"📷 图片正在云端同步中: {img_path} (请确保它已分批上传至 GitHub 仓库)")
+
+
+# ==================== 3. 网页初始化与背景美化 ====================
 st.set_page_config(page_title="Wallace 的个人精神空间", page_icon="📓", layout="wide")
 
-# 🎨 背景美化 CSS
 st.markdown("""
 <style>
 .stApp {
@@ -48,8 +68,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ✨ 炫酷鼠标点击漂浮粒子特效 JavaScript
-# 我们通过访问 window.parent.document 强行把点击特效注入到你的整个网页中
+# ✨ 鼠标点击漂浮粒子特效 JavaScript
 components.html("""
 <script>
 const parentDoc = window.parent.document;
@@ -96,23 +115,17 @@ if (!parentDoc.getElementById('click-effect-handler')) {
 """, height=0)
 
 
-# ==================== 3. 导航与页面状态管理 ====================
-# 初始化点赞数据
+# ==================== 4. 导航与页面状态管理 ====================
 if "likes_dish5" not in st.session_state: st.session_state.likes_dish5 = 18
 if "likes_dish3" not in st.session_state: st.session_state.likes_dish3 = 12
 if "likes_dish2" not in st.session_state: st.session_state.likes_dish2 = 25
 if "likes_dish4" not in st.session_state: st.session_state.likes_dish4 = 15
 if "likes_dish1" not in st.session_state: st.session_state.likes_dish1 = 30
 
-# 导航跳转状态
-if "selected_dish" not in st.session_state:
-    st.session_state.selected_dish = None
-if "selected_diary" not in st.session_state:
-    st.session_state.selected_diary = None
-if "selected_daily" not in st.session_state:
-    st.session_state.selected_daily = None
+if "selected_dish" not in st.session_state: st.session_state.selected_dish = None
+if "selected_diary" not in st.session_state: st.session_state.selected_diary = None
+if "selected_daily" not in st.session_state: st.session_state.selected_daily = None
 
-# 👈 创建左侧时尚的侧边栏导航
 menu = st.sidebar.radio(
     "🧭 导航菜单",
     ["🍔 经典美食评测", "📓 个人私密日记", "🛒 Wallace 的日常生活"]
@@ -152,7 +165,9 @@ if menu == "🍔 经典美食评测":
             st.rerun()
         st.divider()
         col_img, col_txt = st.columns([1, 1.2])
-        with col_img: st.image(data["image"], use_container_width=True)
+        with col_img: 
+            # 使用安全加载器
+            safe_image(data["image"])
         with col_txt:
             st.title(data["title"])
             st.caption(data["desc"])
@@ -181,7 +196,7 @@ if menu == "🍔 经典美食评测":
         with tab1:
             st.subheader("🍜 家常美味与中式套餐")
             col1, col2 = st.columns([1, 2])
-            with col1: st.image("my_dish5.jpg")
+            with col1: safe_image("my_dish5.jpg")
             with col2:
                 st.markdown("### 🥇 蒜蓉大虾炒时蔬")
                 st.write(DISH_DATA["dish5"]["desc"])
@@ -189,7 +204,7 @@ if menu == "🍔 经典美食评测":
                 if st.button(f"点赞 👍 ({st.session_state.likes_dish5})", key="btn_dish5"): st.session_state.likes_dish5 += 1; st.rerun()
             st.divider()
             col3, col4 = st.columns([1, 2])
-            with col3: st.image("my_dish3.jpg")
+            with col3: safe_image("my_dish3.jpg")
             with col4:
                 st.markdown("### 🥈 丰盛中式能量套餐")
                 st.write(DISH_DATA["dish3"]["desc"])
@@ -198,7 +213,7 @@ if menu == "🍔 经典美食评测":
         with tab2:
             st.subheader("🥩 西班牙火腿专题")
             col1, col2 = st.columns([1, 2])
-            with col1: st.image("my_dish2.jpg")
+            with col1: safe_image("my_dish2.jpg")
             with col2:
                 st.markdown("### 🥇 50% 伊比利亚火腿（现切片）")
                 st.write(DISH_DATA["dish2"]["desc"])
@@ -206,7 +221,7 @@ if menu == "🍔 经典美食评测":
                 if st.button(f"点赞 👍 ({st.session_state.likes_dish2})", key="btn_dish2"): st.session_state.likes_dish2 += 1; st.rerun()
             st.divider()
             col3, col4 = st.columns([1, 2])
-            with col3: st.image("my_dish4.jpg")
+            with col3: safe_image("my_dish4.jpg")
             with col4:
                 st.markdown("### 🥈 Legado Ibérico 火腿（24个月）")
                 st.write(DISH_DATA["dish4"]["desc"])
@@ -215,7 +230,7 @@ if menu == "🍔 经典美食评测":
         with tab3:
             st.subheader("🍣 精致日料体验")
             col1, col2 = st.columns([1, 2])
-            with col1: st.image("my_dish1.jpg")
+            with col1: safe_image("my_dish1.jpg")
             with col2:
                 st.markdown("### 🥇 什锦大虾天妇罗")
                 st.write(DISH_DATA["dish1"]["desc"])
@@ -225,7 +240,6 @@ if menu == "🍔 经典美食评测":
 
 # ==================== 页面二：个人私密日记 ====================
 elif menu == "📓 个人私密日记":
-    # 你的小说《路》的数据
     DIARY_POSTS = {
         "road": {
             "title": "《路》—— 顺河高架与三克的温度",
@@ -251,7 +265,7 @@ elif menu == "📓 个人私密日记":
             后来西班牙赢了，我猜对了。
 
             下一次见面，隔了整整一个月。她连着上了一个月的班，没有私人时间。
-            我没有催她。
+            I didn't rush her.
             送出那套三支装手霜礼盒的时候，我也把那条三克的金项链给了她。
             我觉得我们接触了快两个月，也是时候了。
             路医生没有生气，她把项链收下，又温和地推回来：
@@ -285,7 +299,6 @@ elif menu == "📓 个人私密日记":
     }
 
     if st.session_state.selected_diary is not None:
-        # 详细日记界面（排版成极简优雅的纸质书感觉）
         post_id = st.session_state.selected_diary
         post = DIARY_POSTS[post_id]
         if st.button("⬅️ 返回日记列表", key="back_to_diary"):
@@ -296,7 +309,6 @@ elif menu == "📓 个人私密日记":
         st.title(post["title"])
         st.caption(f"🕒 发表于 {post['date']} | 独立创作")
         
-        # 精致的阅读排版
         st.markdown(f"""
         <div style="font-family: 'Georgia', serif; font-size: 1.15em; line-height: 2; color: #2c3e50; padding: 20px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-width: 800px; margin: 0 auto;">
             {post['content'].replace('\\n', '<br>')}
@@ -304,7 +316,6 @@ elif menu == "📓 个人私密日记":
         """, unsafe_allow_html=True)
         
         st.write("---")
-        # 日记也支持私密留言
         st.subheader("💬 读后感与私密回应")
         with st.form(key=f"form_diary_{post_id}", clear_on_submit=True):
             user_name = st.text_input("昵称：", placeholder="留下一个代号...")
@@ -322,7 +333,6 @@ elif menu == "📓 个人私密日记":
         st.title("📓 Wallace 的个人私密日记")
         st.markdown("一些在寂静深夜、高架桥上，或银行复核机器轰鸣声中的个人随笔。")
         
-        # 日记卡片展示
         for k, v in DIARY_POSTS.items():
             st.markdown(f"""
             <div style="background-color: #ffffff; padding: 25px; border-radius: 15px; border-left: 6px solid #2c3e50; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px;">
@@ -338,7 +348,6 @@ elif menu == "📓 个人私密日记":
 
 # ==================== 页面三：Wallace 的日常生活 ====================
 elif menu == "🛒 Wallace 的日常生活":
-    # 芥川风格随笔的数据
     DAILY_STORIES = {
         "sams": {
             "title": "《山姆的日光灯与冻肉之美》",
@@ -357,7 +366,7 @@ elif menu == "🛒 Wallace 的日常生活":
             
             回到银行，正午。
             食堂白瓷盘里那个木讷的南瓜、缠绕多汁的粉丝，以及泛着温热油光的肉丸，在复核姐姐细微、沉闷的啜泣声中，被我一口口机械地咽下喉咙。
-            我的心跳依旧是一分钟六十几下，稳定、迟钝得像一架没有灵魂的工业测谎仪。
+            我的心跳依旧是一分钟六十几下，稳定、迟闷得像一架没有灵魂的工业测谎仪。
             混乱的深夜早已远去，我只是用哑铃、冰冷的重铁和这大块的生牛肉，将它们生生压进废墟的底层，筑起一道理性的高墙。
             """
         },
@@ -395,7 +404,6 @@ elif menu == "🛒 Wallace 的日常生活":
         st.title(story["title"])
         st.caption(f"🕒 记录时间：{story['date']} | 摄影与撰文：Wallace")
         
-        # 芥川风格文章展示
         st.markdown(f"""
         <div style="font-family: 'Kaiti', 'STKaiti', serif; font-size: 1.2em; line-height: 2.1; color: #1a1a1a; padding: 25px; background-color: #FDFCF7; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); max-width: 850px; margin: 0 auto; border-left: 4px solid #8e8e8e;">
             {story['content'].replace('\\n', '<br>')}
@@ -405,14 +413,14 @@ elif menu == "🛒 Wallace 的日常生活":
         st.write("---")
         st.subheader("📷 故事背后的真实快照")
         
-        # 展示这一篇日常附带的真实照片（两两分栏展示）
+        # 使用安全图片加载器，防止因为部分图片大写或未上传完毕导致崩溃
         for i in range(0, len(story["images"]), 2):
             cols = st.columns(2)
             with cols[0]:
-                st.image(story["images"][i], use_container_width=True)
+                safe_image(story["images"][i])
             if i + 1 < len(story["images"]):
                 with cols[1]:
-                    st.image(story["images"][i+1], use_container_width=True)
+                    safe_image(story["images"][i+1])
                     
         st.write("---")
         st.subheader("💬 朋友的碎碎念")
@@ -432,7 +440,6 @@ elif menu == "🛒 Wallace 的日常生活":
         st.title("🛒 Wallace 的日常生活分享")
         st.markdown("将枯燥、麻木、冷硬的日常生活，用锋利的文字与真实的快照进行解剖。")
         
-        # 日常列表展示
         for k, v in DAILY_STORIES.items():
             st.markdown(f"""
             <div style="background-color: #ffffff; padding: 25px; border-radius: 15px; border-left: 6px solid #8e8e8e; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px;">
@@ -446,19 +453,19 @@ elif menu == "🛒 Wallace 的日常生活":
                 st.rerun()
 
 
-# ==================== 4. 🎵 底部 B 站背景音乐播放器 ====================
-st.sidebar.write("---")
-st.sidebar.markdown("#### 🎵 顺河高架电台")
-st.sidebar.write("点击播放深夜 Lo-Fi 旋律：")
-with st.sidebar:
-    components.html("""
-    <iframe src="//player.bilibili.com/player.html?bvid=BV1Aa411C7EJ&page=1&high_quality=1" 
-            scrolling="no" 
-            border="0" 
-            frameborder="no" 
-            framespacing="0" 
-            allowfullscreen="true" 
-            width="100%" 
-            height="320">
-    </iframe>
-    """, height=340)
+# ==================== 5. 🎵 底部 B 站背景音乐播放器（回归主宽屏，解决精简版音量被隐藏的问题） ====================
+# 这里把它从左侧窄边栏移回主宽页面最下方，B站播放器会自动识别并显示完整版，包含音量调节滑块！
+st.write("---")
+st.markdown("#### 🎵 顺河高架电台")
+st.write("点击下方播放按钮，一边听着温暖的 Lo-Fi 音乐，一边开启阅读之旅吧：")
+components.html("""
+<iframe src="//player.bilibili.com/player.html?bvid=BV1Aa411C7EJ&page=1&high_quality=1" 
+        scrolling="no" 
+        border="0" 
+        frameborder="no" 
+        framespacing="0" 
+        allowfullscreen="true" 
+        width="100%" 
+        height="320">
+</iframe>
+""", height=340)
