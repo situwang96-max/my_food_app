@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components  # 1. 成功导入 B 站网页嵌入组件！
 import sqlite3
 
 # ==================== 1. 初始化数据库设置 ====================
@@ -32,13 +33,14 @@ def get_comments(dish_id):
     conn.close()
     return rows
 
+# 运行数据库初始化（修复了拼写错误）
 init_db()
 
 
 # ==================== 2. 网页初始化与背景美化 ====================
 st.set_page_config(page_title="Wallace 的美食评价空间", page_icon="🍔", layout="wide")
 
-# 🎨 注入自定义 CSS，将网页背景改为柔和、温馨的浅米色（更像美食博主的网站）
+# 🎨 注入自定义 CSS（修复了拼写错误）
 st.markdown("""
 <style>
 .stApp {
@@ -50,7 +52,7 @@ st.markdown("""
 
 # 初始化页面跳转状态
 if "selected_dish" not in st.session_state:
-    st.session_state.selected_dish = None  # None 代表在主页
+    st.session_state.selected_dish = None
 
 # 初始化点赞数据
 if "likes_dish5" not in st.session_state: st.session_state.likes_dish5 = 18
@@ -60,7 +62,7 @@ if "likes_dish4" not in st.session_state: st.session_state.likes_dish4 = 15
 if "likes_dish1" not in st.session_state: st.session_state.likes_dish1 = 30
 
 
-# 定义每个菜品的详细数据（用于详情页展示）
+# 菜品详细数据
 DISH_DATA = {
     "dish5": {
         "title": "🥇 蒜蓉大虾炒时蔬",
@@ -109,7 +111,6 @@ if st.session_state.selected_dish is not None:
         
     st.divider()
     
-    # 详情展示（左右分栏）
     col_img, col_txt = st.columns([1, 1.2])
     with col_img:
         st.image(data["image"], use_container_width=True)
@@ -120,10 +121,9 @@ if st.session_state.selected_dish is not None:
         
     st.divider()
     
-    # 💬 专属评论区
+    # 专属评论区
     st.subheader(f"💬 {data['title']} 的食客留言板")
     
-    # 评论输入表单
     with st.form(key=f"form_{dish_id}", clear_on_submit=True):
         user_name = st.text_input("您的昵称：", placeholder="例如：好吃爱吃")
         user_comment = st.text_area("您的评价：", placeholder="写下你的真实食评吧...")
@@ -137,7 +137,6 @@ if st.session_state.selected_dish is not None:
                 st.success("🎉 评价发表成功！")
                 st.rerun()
     
-    # 展示历史评论
     comments_list = get_comments(dish_id)
     if len(comments_list) == 0:
         st.caption("暂无评论，快来抢沙发吧！🛋️")
@@ -162,7 +161,6 @@ else:
     with tab1:
         st.subheader("🍜 家常美味与中式套餐")
         
-        # 菜品：大虾炒时蔬
         col1, col2 = st.columns([1, 2])
         with col1:
             st.image("my_dish5.jpg")
@@ -171,7 +169,6 @@ else:
             st.write(DISH_DATA["dish5"]["desc"])
             st.markdown("**推荐指数：** ⭐⭐⭐⭐⭐")
             
-            # 点击按钮，切换到对应菜品的详情页状态
             if st.button("查看详情 📖", key="view_dish5"):
                 st.session_state.selected_dish = "dish5"
                 st.rerun()
@@ -182,7 +179,6 @@ else:
 
         st.divider()
 
-        # 菜品：中式套餐
         col3, col4 = st.columns([1, 2])
         with col3:
             st.image("my_dish3.jpg")
@@ -203,7 +199,6 @@ else:
     with tab2:
         st.subheader("🥩 西班牙火腿专题")
         
-        # 菜品：火腿切片
         col5, col6 = st.columns([1, 2])
         with col5:
             st.image("my_dish2.jpg")
@@ -222,7 +217,6 @@ else:
 
         st.divider()
 
-        # 菜品：火腿包装
         col7, col8 = st.columns([1, 2])
         with col7:
             st.image("my_dish4.jpg")
@@ -243,7 +237,6 @@ else:
     with tab3:
         st.subheader("🍣 精致日料体验")
         
-        # 菜品：天妇罗
         col9, col10 = st.columns([1, 2])
         with col9:
             st.image("my_dish1.jpg")
@@ -259,3 +252,22 @@ else:
             if st.button(f"点赞 👍 ({st.session_state.likes_dish1})", key="btn_dish1"):
                 st.session_state.likes_dish1 += 1
                 st.rerun()
+
+    # ==================== 4. 🎵 新增的 B 站音乐播放器 ====================
+    # 把它放在主页最底部，这样只要在主页上，大家就能自由听歌
+    st.write("---")
+    st.markdown("#### 🎵 Wallace 的背景音乐电台")
+    st.write("点击下方播放按钮，一边听着温暖的 Lo-Fi 音乐，一边开启美食之旅吧：")
+    
+    # 2. 嵌入你在 B 站找的《千与千寻》Lo-Fi 视频
+    components.html("""
+    <iframe src="//player.bilibili.com/player.html?bvid=BV1Aa411C7EJ&page=1&high_quality=1" 
+            scrolling="no" 
+            border="0" 
+            frameborder="no" 
+            framespacing="0" 
+            allowfullscreen="true" 
+            width="100%" 
+            height="320">
+    </iframe>
+    """, height=340)
