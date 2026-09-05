@@ -37,14 +37,12 @@ def get_comments(dish_id):
 init_db()
 
 
-# ==================== 2. 安全图片加载器（支持双后缀 .jpg.jpg） ====================
+# ==================== 2. 安全图片加载器 ====================
 def safe_image(img_path, caption=None, use_container_width=True):
-    # 1. 尝试原文件名
     if os.path.exists(img_path):
         st.image(img_path, caption=caption, use_container_width=use_container_width)
         return
     
-    # 2. 如果不存在，自动尝试其他常见后缀（这里加入了 .jpg.jpg 双后缀的自动识别）
     base, ext = os.path.splitext(img_path)
     alt_suffixes = [
         ext.upper(), ext.lower(), 
@@ -57,7 +55,6 @@ def safe_image(img_path, caption=None, use_container_width=True):
             st.image(alt_path, caption=caption, use_container_width=use_container_width)
             return
             
-    # 3. 实在没有找到，显示友好提示，不破坏网页结构
     st.info(f"📷 图片正在云端同步中: {img_path} (请确保它已分批上传至 GitHub 仓库)")
 
 
@@ -72,7 +69,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ✨ 鼠标点击漂浮粒子特效 JavaScript
+# ✨ 鼠标点击漂浮粒子特效
 components.html("""
 <script>
 const parentDoc = window.parent.document;
@@ -129,6 +126,10 @@ if "likes_dish1" not in st.session_state: st.session_state.likes_dish1 = 30
 if "selected_dish" not in st.session_state: st.session_state.selected_dish = None
 if "selected_diary" not in st.session_state: st.session_state.selected_diary = None
 if "selected_daily" not in st.session_state: st.session_state.selected_daily = None
+
+# 🔒 新增：初始化日记锁定状态
+if "diary_unlocked" not in st.session_state: 
+    st.session_state.diary_unlocked = False
 
 menu = st.sidebar.radio(
     "🧭 导航菜单",
@@ -241,112 +242,130 @@ if menu == "🍔 经典美食评测":
                 if st.button(f"点赞 👍 ({st.session_state.likes_dish1})", key="btn_dish1"): st.session_state.likes_dish1 += 1; st.rerun()
 
 
-# ==================== 页面二：个人私密日记 ====================
+# ==================== 页面二：个人私密日记（新增密码保护） ====================
 elif menu == "📓 个人私密日记":
-    DIARY_POSTS = {
-        "road": {
-            "title": "《路》—— 顺河高架与三克的温度",
-            "date": "2026-09-05",
-            "excerpt": "凌晨三点的济南，顺河高架上很空。没有一辆车在等。但我知道，什么都会发生。",
-            "content": """
-            一套欧舒丹三支装手霜礼盒的重量，九十克。
-            一条我自己买的金项链的重量，三克。
-            三克，并不多。
-            路医生把后者退给我的时候，是在我的车里。
-            她说：
-            “现在还不是时候。”
-            她抵押给我的，是下一次见面。
-
-            济南第三人民医院在工业北路，旁边是顺河高架。
-            她在那里的消化科，值班，查房，看那些坏掉的胃。
-            她天天很忙，待遇降了不少，她觉得绝望，甚至开玩笑说想去跑外卖。
-            我没有劝她坚持。
-            我是唯一一个劝她辞职的人。
-
-            七月，二十六国外的世界杯决赛还没踢。
-            她猜阿根廷夺冠，我猜西班牙。
-            后来西班牙赢了，我猜对了。
-
-            下一次见面，隔了整整一个月。她连着上了一个月的班，没有私人时间。
-            我没有催她。
-            送出那套三支装手霜礼盒的时候，我也把那条三克的金项链给了她。
-            我觉得我们接触了快两个月，也是时候了。
-            路医生没有生气，她把项链收下，又温和地推回来：
-            “下次见面，我给你送回来。”
-            她没有说下次是什么时候。
-            我也没有问。
-
-            那天她刚烫了头发。
-            新发型有些蓬松，显得比平时成熟，甚至有些老气。她没化妆，皮肤在下午车里的光线里，不如上次见面时雪白。
-            我看着她的侧脸。
-            我的心跳很稳。
-            一分钟六十几下，和在银行上班、看复核姐姐哭泣时没有区别。
-
-            我每周去五次健身房，自己做健康餐。
-            她不知道我曾经有过多么混乱的深夜，我从没让她发现过，以后她也不会知道了。
-
-            今晚，我买了山姆的大鱿鱼、罗氏虾和肥肠。
-            我今天去外面的健身房练了力量，感觉力气变大了，手臂上的肌肉绷得很紧。
-            路医生的那套手霜礼盒，还在她的抽屉里。
-            下周，她要来还那条项链。
-            那是我们的第五次见面。
-
-            我想：
-            原来是这样。
-            凌晨三点的济南，顺河高架上很空。
-            没有一辆车在等。
-            但这一次。
-            我知道，什么都会发生。
-            """
-        }
-    }
-
-    if st.session_state.selected_diary is not None:
-        post_id = st.session_state.selected_diary
-        post = DIARY_POSTS[post_id]
-        if st.button("⬅️ 返回日记列表", key="back_to_diary"):
-            st.session_state.selected_diary = None
-            st.rerun()
+    # 🔐 如果未解锁，显示输入密码界面
+    if not st.session_state.diary_unlocked:
+        st.title("🔒 访问受限")
+        st.markdown("这里是 Wallace 的私人空间，需要输入密码才能查阅。")
         
-        st.divider()
-        st.title(post["title"])
-        st.caption(f"🕒 发表于 {post['date']} | 独立创作")
-        
-        st.markdown(f"""
-        <div style="font-family: 'Georgia', serif; font-size: 1.15em; line-height: 2; color: #2c3e50; padding: 20px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-width: 800px; margin: 0 auto;">
-            {post['content'].replace('\\n', '<br>')}
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.write("---")
-        st.subheader("💬 读后感与私密回应")
-        with st.form(key=f"form_diary_{post_id}", clear_on_submit=True):
-            user_name = st.text_input("昵称：", placeholder="留下一个代号...")
-            user_comment = st.text_area("寄语：", placeholder="说你想说的话...")
-            if st.form_submit_button("发送 📮"):
-                if user_name.strip() and user_comment.strip():
-                    add_comment(f"diary_{post_id}", user_name, user_comment)
-                    st.success("🎉 发送成功！")
-                    st.rerun()
-        comments_list = get_comments(f"diary_{post_id}")
-        for username, content, created_at in comments_list:
-            st.markdown(f'<div style="background-color: #f0f2f6; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #FF4B4B;"><strong style="color: #FF4B4B;">👤 {username}</strong><span style="color: #888; font-size: 0.8em; float: right;">🕒 {created_at}</span><p style="margin-top: 10px; margin-bottom: 0px; color: #333;">{content}</p></div>', unsafe_allow_html=True)
-
+        # 密码输入框，type="password" 会自动将输入的内容变成圆点 ●●●●●
+        # 默认密码是 wallace1996，你可以随时把下面这一行中的 wallace1996 改成其他的
+        pwd_input = st.text_input("请输入访问密码：", type="password", placeholder="请输入密码...")
+        if st.button("解锁空间 🔑"):
+            if pwd_input == "wallace1996":
+                st.session_state.diary_unlocked = True
+                st.success("🎉 密码正确，正在进入空间...")
+                st.rerun()
+            else:
+                st.error("❌ 密码错误，请重新输入！")
+    
+    # 🔓 如果已解锁，正常展示日记内容
     else:
-        st.title("📓 Wallace 的个人私密日记")
-        st.markdown("一些在寂静深夜、高架桥上，或银行复核机器轰鸣声中的个人随笔。")
-        
-        for k, v in DIARY_POSTS.items():
+        DIARY_POSTS = {
+            "road": {
+                "title": "《路》—— 顺河高架与三克的温度",
+                "date": "2026-09-05",
+                "excerpt": "凌晨三点的济南，顺河高架上很空。没有一辆车在等。但我知道，什么都会发生。",
+                "content": """
+                一套欧舒丹三支装手霜礼盒的重量，九十克。
+                一条我自己买的金项链的重量，三克。
+                三克，并不多。
+                路医生把后者退给我的时候，是在我的车里。
+                她说：
+                “现在还不是时候。”
+                她抵押给我的，是下一次见面。
+
+                济南第三人民医院在工业北路，旁边是顺河高架。
+                她在那里的消化科，值班，查房，看那些坏掉的胃。
+                她天天很忙，待遇降了不少，她觉得绝望，甚至开玩笑说想去跑外卖。
+                我没有劝她坚持。
+                我是唯一一个劝她辞职的人。
+
+                七月，二十六国外的世界杯决赛还没踢。
+                她猜阿根廷夺冠，我猜西班牙。
+                后来西班牙赢了，我猜对了。
+
+                下一次见面，隔了整整一个月。她连着上了一个月的班，没有私人时间。
+                我没有催她。
+                送出那套三支装手霜礼盒的时候，我也把那条三克的金项链给了她。
+                我觉得我们接触了快两个月，也是时候了。
+                路医生没有生气，她把项链收下，又温和地推回来：
+                “下次见面，我给你送回来。”
+                她没有说下次是什么时候。
+                我也没有问。
+
+                那天她刚烫了头发。
+                新发型有些蓬松，显得比平时成熟，甚至有些老气。她没化妆，皮肤在下午车里的光线里，不如上次见面时雪白。
+                我看着她的侧脸。
+                我的心跳很稳。
+                一分钟六十几下，和在银行上班、看复核姐姐哭泣时没有区别。
+
+                我每周去五次健身房，自己做健康餐。
+                她不知道我曾经有过多么混乱的深夜，我从没让她发现过，以后她也不会知道了。
+
+                今晚，我买了山姆的大鱿鱼、罗氏虾和肥肠。
+                我今天去外面的健身房练了力量，感觉力气变大了，手臂上的肌肉绷得很紧。
+                路医生的那套手霜礼盒，还在她的抽屉里。
+                下周，她要来还那条项链。
+                那是我们的第五次见面。
+
+                我想：
+                原来是这样。
+                凌晨三点的济南，顺河高架上很空。
+                没有一辆车在等。
+                但这一次。
+                我知道，什么都会发生。
+                """
+            }
+        }
+
+        if st.session_state.selected_diary is not None:
+            post_id = st.session_state.selected_diary
+            post = DIARY_POSTS[post_id]
+            if st.button("⬅️ 返回日记列表", key="back_to_diary"):
+                st.session_state.selected_diary = None
+                st.rerun()
+            
+            st.divider()
+            st.title(post["title"])
+            st.caption(f"🕒 发表于 {post['date']} | 独立创作")
+            
             st.markdown(f"""
-            <div style="background-color: #ffffff; padding: 25px; border-radius: 15px; border-left: 6px solid #2c3e50; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px;">
-                <h3 style="margin-top:0px; color: #2c3e50;">{v['title']}</h3>
-                <span style="color: #888; font-size: 0.9em;">🕒 {v['date']}</span>
-                <p style="color: #555; margin-top: 15px; font-style: italic; font-family: 'Georgia', serif;">“{v['excerpt']}”</p>
+            <div style="font-family: 'Georgia', serif; font-size: 1.15em; line-height: 2; color: #2c3e50; padding: 20px; background-color: #fff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-width: 800px; margin: 0 auto;">
+                {post['content'].replace('\\n', '<br>')}
             </div>
             """, unsafe_allow_html=True)
-            if st.button("点击阅读完整篇章 📖", key=f"read_{k}"):
-                st.session_state.selected_diary = k
-                st.rerun()
+            
+            st.write("---")
+            st.subheader("💬 读后感与私密回应")
+            with st.form(key=f"form_diary_{post_id}", clear_on_submit=True):
+                user_name = st.text_input("昵称：", placeholder="留下一个代号...")
+                user_comment = st.text_area("寄语：", placeholder="说你想说的话...")
+                if st.form_submit_button("发送 📮"):
+                    if user_name.strip() and user_comment.strip():
+                        add_comment(f"diary_{post_id}", user_name, user_comment)
+                        st.success("🎉 发送成功！")
+                        st.rerun()
+            comments_list = get_comments(f"diary_{post_id}")
+            for username, content, created_at in comments_list:
+                st.markdown(f'<div style="background-color: #f0f2f6; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #FF4B4B;"><strong style="color: #FF4B4B;">👤 {username}</strong><span style="color: #888; font-size: 0.8em; float: right;">🕒 {created_at}</span><p style="margin-top: 10px; margin-bottom: 0px; color: #333;">{content}</p></div>', unsafe_allow_html=True)
+
+        else:
+            st.title("📓 Wallace 的个人私密日记")
+            st.markdown("一些在寂静深夜、高架桥上，或银行复核机器轰鸣声中的个人随笔。")
+            
+            for k, v in DIARY_POSTS.items():
+                st.markdown(f"""
+                <div style="background-color: #ffffff; padding: 25px; border-radius: 15px; border-left: 6px solid #2c3e50; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                    <h3 style="margin-top:0px; color: #2c3e50;">{v['title']}</h3>
+                    <span style="color: #888; font-size: 0.9em;">🕒 {v['date']}</span>
+                    <p style="color: #555; margin-top: 15px; font-style: italic; font-family: 'Georgia', serif;">“{v['excerpt']}”</p>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button("点击阅读完整篇章 📖", key=f"read_{k}"):
+                    st.session_state.selected_diary = k
+                    st.rerun()
 
 
 # ==================== 页面三：Wallace 的日常生活 ====================
@@ -416,7 +435,6 @@ elif menu == "🛒 Wallace 的日常生活":
         st.write("---")
         st.subheader("📷 故事背后的真实快照")
         
-        # 使用安全图片加载器，防止因为部分图片大写或未上传完毕导致崩溃
         for i in range(0, len(story["images"]), 2):
             cols = st.columns(2)
             with cols[0]:
@@ -456,18 +474,27 @@ elif menu == "🛒 Wallace 的日常生活":
                 st.rerun()
 
 
-# ==================== 5. 🎵 底部 B 站背景音乐播放器（回归主宽屏，解决精简版音量被隐藏的问题） ====================
-st.write("---")
-st.markdown("#### 🎵 顺河高架电台")
-st.write("点击下方播放按钮，一边听着温暖的 Lo-Fi 音乐，一边开启阅读之旅吧：")
-components.html("""
-<iframe src="//player.bilibili.com/player.html?bvid=BV1Aa411C7EJ&page=1&high_quality=1" 
-        scrolling="no" 
-        border="0" 
-        frameborder="no" 
-        framespacing="0" 
-        allowfullscreen="true" 
-        width="100%" 
-        height="320">
-</iframe>
-""", height=340)
+# ==================== 5. 侧边栏辅助功能：一键锁定与电台 ====================
+# 🔒 如果已经解锁，在左侧侧边栏提供一个“一键重新锁定”的按钮，保护隐私
+if st.session_state.diary_unlocked:
+    st.sidebar.write("---")
+    st.sidebar.subheader("🔒 隐私保护")
+    if st.sidebar.button("锁定日记空间"):
+        st.session_state.diary_unlocked = False
+        st.rerun()
+
+st.sidebar.write("---")
+st.sidebar.markdown("#### 🎵 顺河高架电台")
+st.sidebar.write("点击下方播放按钮，一边听着温暖的 Lo-Fi 音乐，一边开启阅读之旅吧：")
+with st.sidebar:
+    components.html("""
+    <iframe src="//player.bilibili.com/player.html?bvid=BV1Aa411C7EJ&page=1&high_quality=1" 
+            scrolling="no" 
+            border="0" 
+            frameborder="no" 
+            framespacing="0" 
+            allowfullscreen="true" 
+            width="100%" 
+            height="320">
+    </iframe>
+    """, height=340)
