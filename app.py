@@ -193,7 +193,7 @@ DISH_DATA = {
         "title": "🥇 蒜蓉大虾炒时蔬",
         "image": "my_dish5.jpg",
         "desc": "大虾鲜甜弹牙，油菜吸收了虾汁和蒜蓉的香气，翠绿爽口。",
-        "detail": "### 👨‍🍳 主厨秘籍与步骤\n1. **食材准备**：新鲜对虾去虾线，青口油菜洗净切段。\n2. **爆香大蒜**：热锅冷油，下入大量蒜蓉，慢火 sauté 至金黄色流油。\n3. **大虾下锅**：转大火，下入大虾翻炒至变红变弯曲，逼出鲜美虾油。\n4. **合体出锅**：最后加入油菜，快速翻炒 30 秒，撒入少许食盐即可出锅。保持油菜的翠绿与爽脆！",
+        "detail": "### 👨‍🍳 主厨秘籍与步骤\n1. **食材准备**：新鲜对虾去虾线，青口油菜洗净切段。\n2. **爆香大蒜**：热锅冷油，下入大量蒜蓉，慢火 sauté 至金颜色流油。\n3. **大虾下锅**：转大火，下入大虾翻炒至变红变弯曲，逼出鲜美虾油。\n4. **合体出锅**：最后加入油菜，快速翻炒 30 秒，撒入少许食盐即可出锅。保持油菜的翠绿与爽脆！",
     },
     "dish3": {
         "category": "中餐",
@@ -279,8 +279,8 @@ DIARY_POSTS = {
 原来是这样。
 凌晨三点的济南，顺河高架上很空。
 没有一辆车在等。
-But this time.
-I know, everything will happen.""",
+但这一次。
+我知道，什么都会发生。""",
     }
 }
 
@@ -532,7 +532,6 @@ elif menu == "📓 个人私密日记":
         st.title("🔒 访问受限")
         st.markdown("这里是 Wallace 的私人空间，需要输入密码才能查阅。")
 
-        # 🚀 兼顾安全与便利：优先读取云端加密 Secrets，本地未配置时，自动使用默认密码 wallace1996 登录，无需繁琐配置！
         try:
             diary_password = st.secrets.get("diary_password", "wallace1996")
         except Exception:
@@ -682,24 +681,4 @@ if st.session_state.diary_unlocked:
         st.rerun()
 
 
-# ==================== 11. 全局背景音乐播放器（主页面最下方，解决手机端隐藏与电脑端音量调节问题） ====================
-# 这里已经完美将电台放回主页面底部，彻底解决了手机端折叠和电脑端音量条丢失的终极体验问题！
-st.write("---")
-st.markdown("#### 🎵 顺河高架电台")
-st.write("点击下方播放按钮，一边听着温暖的 Lo-Fi 音乐，一边开启阅读之旅吧：")
-
-components.html(
-    """
-    <iframe src="//player.bilibili.com/player.html?bvid=BV1Aa411C7EJ&page=1&high_quality=1"
-            scrolling="no"
-            border="0"
-            frameborder="no"
-            framespacing="0"
-            allowfullscreen="true"
-            width="100%"
-            height="320">
-    </iframe>
-    """,
-    height=340,
-)
---- END OF FILE app_v2.py ---
+# ==================== 11
